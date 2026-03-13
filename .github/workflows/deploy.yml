@@ -1,0 +1,26 @@
+name: Deploy to Oracle Server
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            ubuntu@"${{ secrets.SSH_HOST }}" \
+            "~/deploy.sh /home/ubuntu/$REPO_NAME app $GITHUB_REPOSITORY"

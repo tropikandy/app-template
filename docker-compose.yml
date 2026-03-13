@@ -1,0 +1,13 @@
+# orch-net is the shared Docker network created by Orchestrator2-Secure.
+# Your container must be on it so nginx-proxy can route to it.
+services:
+  app:
+    build: .
+    container_name: my-app   # keep in sync with service.yml container_name
+    restart: unless-stopped
+    networks:
+      - orch-net
+
+networks:
+  orch-net:
+    external: true   # created by Orchestrator2-Secure docker-compose
